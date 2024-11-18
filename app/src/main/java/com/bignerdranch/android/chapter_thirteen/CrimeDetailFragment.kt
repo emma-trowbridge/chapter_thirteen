@@ -5,12 +5,15 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
+import androidx.activity.addCallback
 import androidx.core.widget.doOnTextChanged
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
+import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import com.bignerdranch.android.chapter_thirteen.databinding.FragmentCrimeDetailBinding
 import kotlinx.coroutines.launch
@@ -61,8 +64,6 @@ class CrimeDetailFragment :Fragment(){
         return binding.root
     }
 
-    //Wiring up views in a fragment
-
 
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -91,6 +92,19 @@ class CrimeDetailFragment :Fragment(){
                 crimeDetailViewModel.updateCrime { oldCrime -> oldCrime.copy(isSolved = isCheckeed)
                 }
             }
+
+            //sets up OnBackPressedCallback
+            requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner) {
+                //checks if title is blank
+                if (binding.crimeTitle.text.toString().isBlank()) {
+                    Toast.makeText(context, "Provide a description of the crime.",
+                        Toast.LENGTH_SHORT).show()
+                } else {
+                    //navigates back if title is not blank
+                    findNavController().popBackStack()
+                }
+            }
+
         }
 
 
