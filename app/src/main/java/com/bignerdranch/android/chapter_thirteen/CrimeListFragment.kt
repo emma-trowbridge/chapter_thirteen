@@ -9,13 +9,14 @@ import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.bignerdranch.android.chapter_thirteen.databinding.FragmentCrimeListBinding
 import kotlinx.coroutines.launch
 
-private const val TAG = "CrimeListFragment"
+//private const val TAG = "CrimeListFragment"
 
-class CrimeListFragment : Fragment() {
+class CrimeListFragment :Fragment() {
 
     private var _binding: FragmentCrimeListBinding? = null
     private val binding
@@ -23,60 +24,64 @@ class CrimeListFragment : Fragment() {
             "Cannot access binding because it is null. Is the view visible?"
         }
 
-//    private var job:Job? = null
+    private val crimeListViewModel :CrimeListViewModel by viewModels()
+//    private var job: Job? = null
 
-    private val crimeListViewModel: CrimeListViewModel by viewModels()
-
-   /* override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        Log.d(TAG, "Total crimes: ${crimeListViewModel.crimes.size}")
-    }*/
-
+    /*  override fun onCreate(savedInstanceState: Bundle?) {
+          super.onCreate(savedInstanceState)
+          Log.d(TAG, "total Crimes :  ${crimeListViewModel.crimes.size}")
+      }*/
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        _binding = FragmentCrimeListBinding.inflate(inflater, container, false)
+        _binding = FragmentCrimeListBinding.inflate(inflater,container, false)
 
         binding.crimeRecyclerView.layoutManager = LinearLayoutManager(context)
 
-        //val crimes = crimeListViewModel.crimes
-        //val adapter = CrimeHolder.CrimeListAdapter(crimes)
-        //binding.crimeRecyclerView.adapter = adapter
+        /* val crimes = crimeListViewModel.crimes
+         val adapter = CrimeListAdapter(crimes)
+         binding.crimeRecyclerView.adapter = adapter*/
 
         return binding.root
     }
 
-    /*override fun onStart() {
-        super.onStart()
+    /*  override fun onStart(){
+          super.onStart()
 
-        job = viewLifecycleOwner.lifecycleScope.launch {
-            val crimes = crimeListViewModel.loadCrimes()
-            binding.crimeRecyclerView.adapter = CrimeHolder.CrimeListAdapter(crimes)
+          job = viewLifecycleOwner.lifecycleScope.launch{
+              val crimes = crimeListViewModel.loadCrimes()
+              binding.crimeRecyclerView.adapter = CrimeListAdapter(crimes)
+          }
 
-        }
-    }*/
+      }*/
 
-    /*override fun onStop() {
-        super.onStop()
-        job?.cancel()
-    }
-*/
+    /*   override fun onStop() {
+           super.onStop()
+           job?.cancel()
+
+       }*/
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
-                //val crimes = crimeListViewModel.loadCrimes()
-                crimeListViewModel.crimes.collect{crimes->
+                // val crimes = crimeListViewModel.loadCrimes()
+                crimeListViewModel.crimes.collect() { crimes ->
                     binding.crimeRecyclerView.adapter =
-                        CrimeHolder.CrimeListAdapter(crimes)
+                        CrimeListAdapter(crimes){ crimeId->
+                            findNavController().navigate(
+                                // R.id.show_crime_detail
+                                CrimeListFragmentDirections.showCrimeDetail(crimeId)
+                            )
+                        }
                 }
             }
         }
     }
+
 
     override fun onDestroyView() {
         super.onDestroyView()
